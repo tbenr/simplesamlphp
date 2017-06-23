@@ -413,6 +413,10 @@ class IdP
                 assert(false);
             } else {
                 $this->reauthenticate($state);
+                if(isset($state['as:Reauth'])) {
+                    $this->authenticate($state);
+                    assert('FALSE');
+                }
             }
             $this->postAuth($state);
         } catch (Exception $e) {
