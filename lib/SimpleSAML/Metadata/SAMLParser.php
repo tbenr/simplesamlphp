@@ -1261,7 +1261,7 @@ class SAMLParser
 
         if($sp['AttributeConsumingService.default'] === null && count($sp['AttributeConsumingService']) > 0) {
             //set default index as first availale index
-            $sp['AttributeConsumingService.default'] = array_keys($sp['AttributeConsumingService'])[0];
+            $sp['AttributeConsumingService.default'] = key(array_keys($sp['AttributeConsumingService']));
         }
     }
 
