@@ -326,6 +326,7 @@ class SAML2
             $allowCreate = true;
             $authnContext = null;
             $binding = null;
+            $attrcsi = null;
 
             $idpInit = true;
 
@@ -372,6 +373,7 @@ class SAML2
             $consumerIndex = $request->getAssertionConsumerServiceIndex();
             $extensions = $request->getExtensions();
             $authnContext = $request->getRequestedAuthnContext();
+            $attrcsi = $request->getAttributeConsumingServiceIndex();
 
             $nameIdPolicy = $request->getNameIdPolicy();
             if (isset($nameIdPolicy['Format'])) {
@@ -458,6 +460,7 @@ class SAML2
             'saml:Extensions'             => $extensions,
             'saml:AuthnRequestReceivedAt' => microtime(true),
             'saml:RequestedAuthnContext'  => $authnContext,
+            'saml:AttributeConsumingServiceIndex'  => $attrcsi,
         ];
 
         $idp->handleAuthenticationRequest($state);
