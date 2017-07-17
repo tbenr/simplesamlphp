@@ -100,6 +100,9 @@ nb-configuration.xml
 # sftp configuration file
 sftp-config.json
 
+### VSCode ###
+.vscode
+
 
 ### Composer ###
 composer.phar
