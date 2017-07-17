@@ -68,7 +68,7 @@ class AttributeLimit extends \SimpleSAML\Auth\ProcessingFilter
         // check if AttributeConsumingService config is present
 		if(array_key_exists('AttributeConsumingService', $request['Destination'])) {
 			// if present, get AttributeConsumingServiceIndex from request
-			if(array_key_exists('saml:AttributeConsumingServiceIndex',$request)) {
+			if(array_key_exists('saml:AttributeConsumingServiceIndex',$request) && !is_null($request['saml:AttributeConsumingServiceIndex'])) {
 				$acsi = $request['saml:AttributeConsumingServiceIndex'];
 				// if index from request exists in the configuration, return corresponding attributes
 				if(array_key_exists($acsi,$request['Destination']['AttributeConsumingService'])) {
