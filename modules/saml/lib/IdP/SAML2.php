@@ -835,6 +835,48 @@ class sspmod_saml_IdP_SAML2
 
 
     /**
+     * Determine attribute value xsi:type(s), merging configs in the following order:
+     *  IdP
+     *  Sp
+     *  State
+     *
+     * so State config will have the precedence
+     *
+     * @param SimpleSAML_Configuration $idpMetadata The metadata of the IdP.
+     * @param SimpleSAML_Configuration $spMetadata The metadata of the SP.
+     * @param array $state.
+     *
+     * @return array resolved array.
+     */
+    private static function getAttributesValueTypes(
+        SimpleSAML_Configuration $idpMetadata,
+        SimpleSAML_Configuration $spMetadata,
+        array &$state
+    ) {
+
+        // get config from idp config
+        $idpavt = $idpMetadata->getArray('attributes.valueTypes', array());
+
+        // get config from sp config
+        $spavt = $spMetadata->getArray('attributes.valueTypes', array());
+
+        // get config from state
+        if (array_key_exists('attributes.valueTypes',$state)) {
+            $stateavt = $state['attributes.valueTypes'];
+            if (!is_array($stateavt)) {
+                $stateavt = array();
+            }
+        } else {
+            $stateavt = array();
+        }
+
+        // merge them all
+        $finalavt = array_merge($idpavt,$spavt,$stateavt);
+
+        return $finalavt;
+    }
+
+    /**
      * Build an assertion based on information in the metadata.
      *
      * @param SimpleSAML_Configuration $idpMetadata The metadata of the IdP.
@@ -958,6 +1000,8 @@ class sspmod_saml_IdP_SAML2
             $a->setAttributeNameFormat($attributeNameFormat);
             $attributes = self::encodeAttributes($idpMetadata, $spMetadata, $state['Attributes']);
             $a->setAttributes($attributes);
+            $attributesValueTypes = self::getAttributesValueTypes($idpMetadata, $spMetadata, $state);
+            $a->setAttributesValueTypes($attributesValueTypes);
         }
 
         // generate the NameID for the assertion
