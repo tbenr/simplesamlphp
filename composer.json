@@ -25,6 +25,12 @@
         },
         "files": ["lib/_autoload_modules.php"]
     },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/tbenr/saml2"
+        }
+    ],
     "require": {
         "php": ">=5.3",
         "ext-SPL": "*",
