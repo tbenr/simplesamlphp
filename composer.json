@@ -42,7 +42,7 @@
         "ext-hash": "*",
         "ext-json": "*",
         "ext-mbstring": "*",
-        "tbenr/saml2": "dev-master#f079abe36ab4101dfda654a087f8003a9673b952 as 2.4",
+        "tbenr/saml2": "dev-for-PR-assertion-attribute-types",
         "robrichards/xmlseclibs": "~2.0",
         "whitehat101/apr1-md5": "~1.0",
         "twig/twig": "~1.0",
