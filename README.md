@@ -10,4 +10,4 @@ Original project links:
 * [SimpleSAMLphp homepage](https://simplesamlphp.org)
 * [SimpleSAMLphp Downloads](https://simplesamlphp.org/download)
 
-Please, [contribute](CONTRIBUTE.md)!
+Please, [contribute](CONTRIBUTING.md)!
