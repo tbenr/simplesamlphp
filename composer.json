@@ -1,5 +1,5 @@
 {
-    "name": "simplesamlphp/simplesamlphp",
+    "name": "tbenr/simplesamlphp",
     "description": "A PHP implementation of a SAML 2.0 service provider and identity provider, also compatible with Shibboleth 1.3 and 2.0.",
     "type": "project",
     "keywords": [ "saml2", "shibboleth","oauth","ws-federation","sp","idp" ],
@@ -25,6 +25,12 @@
         },
         "files": ["lib/_autoload_modules.php"]
     },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/tbenr/saml2"
+        }
+    ],
     "require": {
         "php": ">=5.4",
         "ext-SPL": "*",
@@ -36,7 +42,7 @@
         "ext-hash": "*",
         "ext-json": "*",
         "ext-mbstring": "*",
-        "simplesamlphp/saml2": "~3.0",
+        "tbenr/saml2": "dev-for-PR-assertion-attribute-types",
         "simplesamlphp/xmlseclibs": "~3.0",
         "whitehat101/apr1-md5": "~1.0",
         "twig/twig": "~1.0",
@@ -53,7 +59,7 @@
         "predis/predis": "1.1.1"
     },
     "support": {
-        "issues": "https://github.com/simplesamlphp/simplesamlphp/issues",
-        "source": "https://github.com/simplesamlphp/simplesamlphp"
+        "issues": "https://github.com/tbenr/simplesamlphp/issues",
+        "source": "https://github.com/tbenr/simplesamlphp"
     }
 }
