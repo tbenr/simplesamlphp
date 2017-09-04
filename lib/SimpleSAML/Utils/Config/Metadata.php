@@ -224,7 +224,7 @@ class Metadata
         $firstAllowed = null;
 
         // look through the endpoint list for acceptable endpoints
-        foreach ($endpoints as $i => $ep) {
+        foreach ($endpoints as $ep) {
             if ($bindings !== null && !in_array($ep['Binding'], $bindings, true)) {
                 // unsupported binding, skip it
                 continue;
@@ -277,6 +277,6 @@ class Metadata
         \SimpleSAML\Logger::maskErrors(E_ALL);
         $hidden = in_array(self::$HIDE_FROM_DISCOVERY, $metadata['EntityAttributes'][self::$ENTITY_CATEGORY]);
         \SimpleSAML\Logger::popErrorMask();
-        return $hidden;
+        return $hidden === true;
     }
 }
