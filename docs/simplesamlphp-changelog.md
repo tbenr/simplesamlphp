@@ -15,13 +15,13 @@ Released TBD
   * Added new `AttributeValueMap` authproc filter.
   * Added attributemaps for OIDs from SIS (Swedish Standards Institute) and
     for eduPersonUniqueId, eduPersonOrcid and sshPublicKey.
-  * Added option to specify metadata signing and digest algorithm
+  * Added an option to specify metadata signing and digest algorithm
     `metadata.sign.algorithm`.
-  * Added option for regular expression matching of trusted.url.domains via new
+  * Added an option for regular expression matching of trusted.url.domains via new
     `trusted.url.regex` setting.
   * The `debug` option is more finegrained and allows one to specify whether
     to log full SAML messages, backtraces or schema validations separately.
-  * Added a check for the latest simpleSAMLphp version on the front page.
+  * Added a check for the latest SimpleSAMLphp version on the front page.
     It can be disabled via the new setting `admin.checkforupdates`.
   * Added a warning when there's a probable misconfiguration of PHP sessions.
   * Added ability to define additional attributes on ContactPerson elements
@@ -116,7 +116,7 @@ Released TBD
   * Handle instead of reject assertions that do not contain a NameID.
   * Added options to configure `AllowCreate` and `SPNameQualifier`.
   * Added option `saml:NameID` to set the Subject NameID in a SAML AuthnRequest.
-  * Added filter `FilterScopes` to remove alues which are not properly scoped.
+  * Added filter `FilterScopes` to remove values which are not properly scoped.
   * Make sure we log the user out before reauthenticating.
   * More robust handling of IDPList support in proxy mode.
   * Increased `_authSource` field length in Logout Store.
@@ -126,6 +126,12 @@ Released TBD
 
 ### `sqlauth`
   * Fixed SQL schema for usergroups table.
+
+## Version 1.14.16
+
+Released 2017-09-04
+
+  * Resolved a security issue in the consentAdmin module. See [SSPSA 201709-01](https://simplesamlphp.org/security/201709-01).
 
 ## Version 1.14.15
 
