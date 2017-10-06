@@ -363,6 +363,11 @@ class SAML2
 
             \SimpleSAML\Module\saml\Message::validateMessage($spMetadata, $idpMetadata, $request);
 
+            $authnValidator = $idpMetadata->getString('saml20.authnRequest.validatorclass', null);
+            if (isset($authnValidator)) {
+                call_user_func(array($authnValidator,'validate'),$request);
+            }
+
             $relayState = $request->getRelayState();
 
             $requestId = $request->getId();
