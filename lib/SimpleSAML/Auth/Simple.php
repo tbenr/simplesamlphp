@@ -1,12 +1,21 @@
 <?php
 
+namespace SimpleSAML\Auth;
+
+use \SimpleSAML_Auth_Source as Source;
+use \SimpleSAML_Auth_State as State;
+use \SimpleSAML_Configuration as Configuration;
+use \SimpleSAML_Error_AuthSource as AuthSourceError;
+use \SimpleSAML\Module;
+use \SimpleSAML_Session as Session;
+use \SimpleSAML\Utils\HTTP;
 
 /**
  * Helper class for simple authentication applications.
  *
  * @package SimpleSAMLphp
  */
-class SimpleSAML_Auth_Simple
+class Simple
 {
 
     /**
@@ -14,8 +23,12 @@ class SimpleSAML_Auth_Simple
      *
      * @var string
      */
-    private $authSource;
+    protected $authSource;
 
+    /**
+     * @var \SimpleSAML_Configuration|null
+     */
+    protected $app_config;
 
     /**
      * Create an instance with the specified authsource.
@@ -27,21 +40,22 @@ class SimpleSAML_Auth_Simple
         assert('is_string($authSource)');
 
         $this->authSource = $authSource;
+        $this->app_config = Configuration::getInstance()->getConfigItem('application', null);
     }
 
 
     /**
      * Retrieve the implementing authentication source.
      *
-     * @return SimpleSAML_Auth_Source The authentication source.
+     * @return \SimpleSAML_Auth_Source The authentication source.
      *
-     * @throws SimpleSAML_Error_AuthSource If the requested auth source is unknown.
+     * @throws \SimpleSAML_Error_AuthSource If the requested auth source is unknown.
      */
     public function getAuthSource()
     {
-        $as = SimpleSAML_Auth_Source::getById($this->authSource);
+        $as = Source::getById($this->authSource);
         if ($as === null) {
-            throw new SimpleSAML_Error_AuthSource($this->authSource, 'Unknown authentication source.');
+            throw new AuthSourceError($this->authSource, 'Unknown authentication source.');
         }
         return $as;
     }
@@ -57,7 +71,7 @@ class SimpleSAML_Auth_Simple
      */
     public function isAuthenticated()
     {
-        $session = SimpleSAML_Session::getSessionFromRequest();
+        $session = Session::getSessionFromRequest();
 
         return $session->isValid($this->authSource);
     }
@@ -79,7 +93,7 @@ class SimpleSAML_Auth_Simple
     public function requireAuth(array $params = array())
     {
 
-        $session = SimpleSAML_Session::getSessionFromRequest();
+        $session = Session::getSessionFromRequest();
 
         if ($session->isValid($this->authSource)) {
             // Already authenticated
@@ -119,12 +133,12 @@ class SimpleSAML_Auth_Simple
             if (array_key_exists('ReturnCallback', $params)) {
                 $returnTo = (array) $params['ReturnCallback'];
             } else {
-                $returnTo = \SimpleSAML\Utils\HTTP::getSelfURL();
+                $returnTo = HTTP::getSelfURL();
             }
         }
 
         if (is_string($returnTo) && $keepPost && $_SERVER['REQUEST_METHOD'] === 'POST') {
-            $returnTo = \SimpleSAML\Utils\HTTP::getPOSTRedirectURL($returnTo, $_POST);
+            $returnTo = HTTP::getPOSTRedirectURL($returnTo, $_POST);
         }
 
         if (array_key_exists('ErrorURL', $params)) {
@@ -134,13 +148,13 @@ class SimpleSAML_Auth_Simple
         }
 
 
-        if (!isset($params[SimpleSAML_Auth_State::RESTART]) && is_string($returnTo)) {
+        if (!isset($params[State::RESTART]) && is_string($returnTo)) {
             /*
              * A URL to restart the authentication, in case the user bookmarks
              * something, e.g. the discovery service page.
              */
             $restartURL = $this->getLoginURL($returnTo);
-            $params[SimpleSAML_Auth_State::RESTART] = $restartURL;
+            $params[State::RESTART] = $restartURL;
         }
 
         $as = $this->getAuthSource();
@@ -161,7 +175,7 @@ class SimpleSAML_Auth_Simple
      *  - 'ReturnStateParam': The parameter we should return the state in when redirecting.
      *  - 'ReturnStateStage': The stage the state array should be saved with.
      *
-     * @param string|array|NULL $params Either the URL the user should be redirected to after logging out, or an array
+     * @param string|array|null $params Either the URL the user should be redirected to after logging out, or an array
      * with parameters for the logout. If this parameter is null, we will return to the current page.
      */
     public function logout($params = null)
@@ -169,7 +183,7 @@ class SimpleSAML_Auth_Simple
         assert('is_array($params) || is_string($params) || is_null($params)');
 
         if ($params === null) {
-            $params = \SimpleSAML\Utils\HTTP::getSelfURL();
+            $params = HTTP::getSelfURL();
         }
 
         if (is_string($params)) {
@@ -185,7 +199,7 @@ class SimpleSAML_Auth_Simple
             assert('isset($params["ReturnStateParam"]) && isset($params["ReturnStateStage"])');
         }
 
-        $session = SimpleSAML_Session::getSessionFromRequest();
+        $session = Session::getSessionFromRequest();
         if ($session->isValid($this->authSource)) {
             $state = $session->getAuthData($this->authSource, 'LogoutState');
             if ($state !== null) {
@@ -196,7 +210,7 @@ class SimpleSAML_Auth_Simple
 
             $params['LogoutCompletedHandler'] = array(get_class(), 'logoutCompleted');
 
-            $as = SimpleSAML_Auth_Source::getById($this->authSource);
+            $as = Source::getById($this->authSource);
             if ($as !== null) {
                 $as->logout($params);
             }
@@ -225,7 +239,7 @@ class SimpleSAML_Auth_Simple
             $params = array();
             if (isset($state['ReturnStateParam']) || isset($state['ReturnStateStage'])) {
                 assert('isset($state["ReturnStateParam"]) && isset($state["ReturnStateStage"])');
-                $stateID = SimpleSAML_Auth_State::saveState($state, $state['ReturnStateStage']);
+                $stateID = State::saveState($state, $state['ReturnStateStage']);
                 $params[$state['ReturnStateParam']] = $stateID;
             }
             \SimpleSAML\Utils\HTTP::redirectTrustedURL($state['ReturnTo'], $params);
@@ -250,7 +264,7 @@ class SimpleSAML_Auth_Simple
         }
 
         // Authenticated
-        $session = SimpleSAML_Session::getSessionFromRequest();
+        $session = Session::getSessionFromRequest();
         return $session->getAuthData($this->authSource, 'Attributes');
     }
 
@@ -270,7 +284,7 @@ class SimpleSAML_Auth_Simple
             return null;
         }
 
-        $session = SimpleSAML_Session::getSessionFromRequest();
+        $session = Session::getSessionFromRequest();
         return $session->getAuthData($this->authSource, $name);
     }
 
@@ -287,7 +301,7 @@ class SimpleSAML_Auth_Simple
             return null;
         }
 
-        $session = SimpleSAML_Session::getSessionFromRequest();
+        $session = Session::getSessionFromRequest();
         return $session->getAuthState($this->authSource);
     }
 
@@ -305,10 +319,10 @@ class SimpleSAML_Auth_Simple
         assert('is_null($returnTo) || is_string($returnTo)');
 
         if ($returnTo === null) {
-            $returnTo = \SimpleSAML\Utils\HTTP::getSelfURL();
+            $returnTo = HTTP::getSelfURL();
         }
 
-        $login = SimpleSAML\Module::getModuleURL('core/as_login.php', array(
+        $login = Module::getModuleURL('core/as_login.php', array(
             'AuthId'   => $this->authSource,
             'ReturnTo' => $returnTo,
         ));
@@ -330,14 +344,58 @@ class SimpleSAML_Auth_Simple
         assert('is_null($returnTo) || is_string($returnTo)');
 
         if ($returnTo === null) {
-            $returnTo = \SimpleSAML\Utils\HTTP::getSelfURL();
+            $returnTo = HTTP::getSelfURL();
         }
 
-        $logout = SimpleSAML\Module::getModuleURL('core/as_logout.php', array(
+        $logout = Module::getModuleURL('core/as_logout.php', array(
             'AuthId'   => $this->authSource,
             'ReturnTo' => $returnTo,
         ));
 
         return $logout;
+    }
+
+
+    /**
+     * Process a URL and modify it according to the application/baseURL configuration option, if present.
+     *
+     * @param string|null $url The URL to process, or null if we want to use the current URL. Both partial and full
+     * URLs can be used as a parameter. The maximum precedence is given to the application/baseURL configuration option,
+     * then the URL specified (if it specifies scheme, host and port) and finally the environment observed in the
+     * server.
+     *
+     * @return string The URL modified according to the precedence rules.
+     */
+    protected function getProcessedURL($url = null)
+    {
+        if ($url === null) {
+            $url = HTTP::getSelfURL();
+        }
+
+        $scheme = parse_url($url, PHP_URL_SCHEME);
+        $host = parse_url($url, PHP_URL_HOST) ?: HTTP::getSelfHost();
+        $port = parse_url($url, PHP_URL_PORT) ?: (
+            $scheme ? '' : trim(HTTP::getServerPort(), ':')
+        );
+        $scheme = $scheme ?: (HTTP::getServerHTTPS() ? 'https' : 'http');
+        $path = parse_url($url, PHP_URL_PATH) ?: '/';
+        $query = parse_url($url, PHP_URL_QUERY) ?: '';
+        $fragment = parse_url($url, PHP_URL_FRAGMENT) ?: '';
+
+        $port = !empty($port) ? ':'.$port : '';
+        if (($scheme === 'http' && $port === ':80') || ($scheme === 'https' && $port === ':443')) {
+            $port = '';
+        }
+
+        if (is_null($this->app_config)) {
+            // nothing more we can do here
+            return $scheme.'://'.$host.$port.$path.($query ? '?'.$query : '').($fragment ? '#'.$fragment : '');
+        }
+
+        $base =  trim($this->app_config->getString(
+            'baseURL',
+            $scheme.'://'.$host.$port
+        ), '/');
+        return $base.$path.($query ? '?'.$query : '').($fragment ? '#'.$fragment : '');
     }
 }
